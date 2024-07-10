@@ -43,7 +43,7 @@ ___TEMPLATE_PARAMETERS___
       {
         "type": "TEXT",
         "name": "instanceName",
-        "displayName": "Instance name",
+        "displayName": "Account name",
         "simpleValueType": true,
         "valueHint": "myinstance",
         "valueValidators": [
