@@ -36,9 +36,9 @@ ___TEMPLATE_PARAMETERS___
   {
     "type": "CHECKBOX",
     "name": "serveJs",
-    "checkboxText": "Serve requests for ppms.js",
+    "checkboxText": "Serve requests for ppms.js and ppas.js",
     "simpleValueType": true,
-    "help": "Allow server-side Google Tag Manager to respond to requests for the ppms.js file, in case you want to load this resource from your endpoint instead of from Piwik PRO\u0027s content distribution network.",
+    "help": "Allow server-side Google Tag Manager to respond to requests for the ppms.js and ppas.js files, in case you want to load these resources from your endpoint instead of from Piwik PRO\u0027s content distribution network.",
     "subParams": [
       {
         "type": "TEXT",
@@ -124,7 +124,7 @@ const setResponseStatus = require('setResponseStatus');
 const templateDataStorage = require('templateDataStorage');
 
 const CACHE_MAX_TIME_MS = 43200000;
-const CDN_PATH = 'https://' + data.instanceName + '.piwik.pro/ppms.js';
+const CDN_PATH = 'https://' + data.instanceName + '.piwik.pro' + getRequestPath();
 const COMMON_EVENT_KEYS_IN_PIWIK = ['event_name', '_id', 'cip', 'lang', 'url', 'urlref', 'res', 'ua', 'uid', 'revenue', 'e_v'];
 const DEFAULT_EVENT_NAME = 'piwik';
 const EVENT_PREFIX = 'x-pp-';
@@ -133,7 +133,7 @@ const LOG_PREFIX = '[ppms_client] ';
 const REQUEST_METHOD = getRequestMethod();
 const REQUEST_ORIGIN = getRequestHeader('origin') || (!!getRequestHeader('referer') && parseUrl(getRequestHeader('referer')).origin) || null;
 const REQUEST_PATH = getRequestPath();
-const STORED_JS_NAME = 'ppms_js';
+const STORED_JS_NAME = (REQUEST_PATH === '/ppas.js' ? 'ppas_js' : 'ppms_js');
 const STORED_HEADERS_NAME = STORED_JS_NAME + '_headers';
 const STORED_TIMEOUT_NAME = STORED_JS_NAME + '_timeout';
 const VALID_REQUEST_METHODS = ['GET', 'POST'];
@@ -174,6 +174,13 @@ const cleanObject = (obj) => {
  */
 const getPpmsFilePath = () => {
   return '/ppms.js';
+};
+
+/**
+ * Returns the path to the ppas.js file.
+ */
+const getPpasFilePath = () => {
+  return '/ppas.js';
 };
 
 /**
@@ -288,22 +295,26 @@ const sendCDNResponse = (body, headers, statusCode) => {
   returnResponse();
 };
 
-// Check if request is for the ppms.js file
-if (REQUEST_PATH === getPpmsFilePath() && !!data.serveJs) {
+// Check if request is for a file
+if (REQUEST_PATH === getPpmsFilePath() || REQUEST_PATH === getPpasFilePath()) {
+  if (!data.serveJs) {
+    log('Request for JS file ignored – request serving not enabled in Client.');
+    return;
+  }
   if (!validateOrigin()) {
     log('Request originated from invalid origin');
     return;
   }
   // Claim the request
   claimRequest();
-  log('ppms.js request claimed');
+  log(REQUEST_PATH + ' request claimed');
   const now = getTimestampMillis();
   const storageExpireTime = now - CACHE_MAX_TIME_MS;
   const storedJsBody = templateDataStorage.getItemCopy(STORED_JS_NAME);
   const storedHeaders = templateDataStorage.getItemCopy(STORED_HEADERS_NAME);
   const storedTimeout = templateDataStorage.getItemCopy(STORED_TIMEOUT_NAME);
   if (!storedJsBody || storedTimeout < storageExpireTime) {
-    log('No cache hit or cache expired, fetching ppms.js over the network.');
+    log('No cache hit or cache expired, fetching ' + REQUEST_PATH + ' over the network.');
     sendHttpGet(CDN_PATH, {timeout: 1500})
       .then(result => {
         if (result.statusCode === 200) {
@@ -314,7 +325,7 @@ if (REQUEST_PATH === getPpmsFilePath() && !!data.serveJs) {
         sendCDNResponse(result.body, result.headers, result.statusCode);
       });
   } else {
-    log('Cache hit successful, fetching ppms.js from SGTM storage.');
+    log('Cache hit successful, fetching ' + REQUEST_PATH + ' from SGTM storage.');
     sendCDNResponse(
       storedJsBody,
       storedHeaders,
@@ -479,6 +490,10 @@ ___SERVER_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://*.piwik.pro/ppms.js"
+              },
+              {
+                "type": 1,
+                "string": "https://*.piwik.pro/ppas.js"
               }
             ]
           }
