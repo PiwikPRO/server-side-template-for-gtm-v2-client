@@ -93,6 +93,19 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ]
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "servePpas",
+        "checkboxText": "Additionally serve the ppas.js file",
+        "simpleValueType": true,
+        "enablingConditions": [
+          {
+            "paramName": "serveJs",
+            "paramValue": true,
+            "type": "EQUALS"
+          }
+        ]
       }
     ]
   }
@@ -125,6 +138,7 @@ const templateDataStorage = require('templateDataStorage');
 
 const CACHE_MAX_TIME_MS = 43200000;
 const CDN_PATH = 'https://' + data.instanceName + '.piwik.pro/ppms.js';
+const CDN_PATH_PPAS = 'https://' + data.instanceName + '.piwik.pro/ppas.js';
 const COMMON_EVENT_KEYS_IN_PIWIK = ['event_name', '_id', 'cip', 'lang', 'url', 'urlref', 'res', 'ua', 'uid', 'revenue', 'e_v'];
 const DEFAULT_EVENT_NAME = 'piwik';
 const EVENT_PREFIX = 'x-pp-';
@@ -134,6 +148,7 @@ const REQUEST_METHOD = getRequestMethod();
 const REQUEST_ORIGIN = getRequestHeader('origin') || (!!getRequestHeader('referer') && parseUrl(getRequestHeader('referer')).origin) || null;
 const REQUEST_PATH = getRequestPath();
 const STORED_JS_NAME = 'ppms_js';
+const STORED_JS_NAME_PPAS = 'ppas_js';
 const STORED_HEADERS_NAME = STORED_JS_NAME + '_headers';
 const STORED_TIMEOUT_NAME = STORED_JS_NAME + '_timeout';
 const VALID_REQUEST_METHODS = ['GET', 'POST'];
@@ -174,6 +189,10 @@ const cleanObject = (obj) => {
  */
 const getPpmsFilePath = () => {
   return '/ppms.js';
+};
+
+const getPpasFilePath = () => {
+  return '/ppas.js';
 };
 
 /**
@@ -322,6 +341,42 @@ if (REQUEST_PATH === getPpmsFilePath() && !!data.serveJs) {
     );
   }
 }
+
+// Check if request is for the ppas.js file
+if (REQUEST_PATH === getPpasFilePath() && !!data.serveJs && !!data.servePpas) {
+  if (!validateOrigin()) {
+    log('Request originated from invalid origin');
+    return;
+  }
+  // Claim the request
+  claimRequest();
+  log('ppas.js request claimed');
+  const now = getTimestampMillis();
+  const storageExpireTime = now - CACHE_MAX_TIME_MS;
+  const storedJsBody = templateDataStorage.getItemCopy(STORED_JS_NAME_PPAS);
+  const storedHeaders = templateDataStorage.getItemCopy(STORED_HEADERS_NAME);
+  const storedTimeout = templateDataStorage.getItemCopy(STORED_TIMEOUT_NAME);
+  if (!storedJsBody || storedTimeout < storageExpireTime) {
+    log('No cache hit or cache expired, fetching ppms.js over the network.');
+    sendHttpGet(CDN_PATH_PPAS, {timeout: 1500})
+      .then(result => {
+        if (result.statusCode === 200) {
+          templateDataStorage.setItemCopy(STORED_JS_NAME, result.body);
+          templateDataStorage.setItemCopy(STORED_HEADERS_NAME, result.headers);
+          templateDataStorage.setItemCopy(STORED_TIMEOUT_NAME, now);
+        }
+        sendCDNResponse(result.body, result.headers, result.statusCode);
+      });
+  } else {
+    log('Cache hit successful, fetching ppms.js from SGTM storage.');
+    sendCDNResponse(
+      storedJsBody,
+      storedHeaders,
+      200
+    );
+  }
+}
+
   
 // Check if request is a Piwik PRO event
 if (REQUEST_PATH === getPpmsEndpointPath() && 
@@ -479,6 +534,10 @@ ___SERVER_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://*.piwik.pro/ppms.js"
+              },
+              {
+                "type": 1,
+                "string": "https://*.piwik.pro/ppas.js"
               }
             ]
           }
