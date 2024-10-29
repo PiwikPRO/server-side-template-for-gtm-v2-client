@@ -2,6 +2,8 @@ homepage: "https://www.piwik.pro/"
 documentation: "https://developers.piwik.pro/en/latest/data_collection/api/http_api.html"
 versions:
   # Latest version
+  - sha: 24376c654b4858b40b90c8d7f3abdd89eb9da967
+    changeNotes: Add support for piwik.php endpoint
   - sha: 32f6fd045f54d84c13610311263122f87924fda6
     changeNotes: Add support for ppas.js loading
   - sha: 5f541d7f3fa49735b74e438c2ae4427a3697f164
