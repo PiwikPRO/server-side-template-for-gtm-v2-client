@@ -190,6 +190,13 @@ const getPpmsEndpointPath = () => {
   return '/ppms.php';
 };
 
+/**
+ * Returns the path to the piwik.php endpoint.
+ */
+const getPiwikEndpointPath = () => {
+  return '/piwik.php';
+};
+
 /** 
  * Merges the two objects together by preferencing obj2.
  *
@@ -335,11 +342,11 @@ if (REQUEST_PATH === getPpmsFilePath() || REQUEST_PATH === getPpasFilePath()) {
 }
   
 // Check if request is a Piwik PRO event
-if (REQUEST_PATH === getPpmsEndpointPath() && 
+if ((REQUEST_PATH === getPpmsEndpointPath() || REQUEST_PATH === getPiwikEndpointPath()) && 
     VALID_REQUEST_METHODS.indexOf(REQUEST_METHOD) > -1) {
   // Claim the request
   claimRequest();
-  log('ppms.php request claimed');
+  log(REQUEST_PATH + ' request claimed');
   
   const requestString = REQUEST_METHOD === 'GET' ? getRequestQueryString() : getRequestBody();
   let requestData = requestStringToObj(requestString);
