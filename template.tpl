@@ -1,11 +1,11 @@
-﻿
+﻿___INFO___
+
 By creating or modifying this file you agree to Google Tag Manager's Community
 Template Gallery Developer Terms of Service available at
 https://developers.google.com/tag-manager/gallery-tos (or such other URL as
 Google may provide), as modified from time to time.
 
 
-___INFO___
 
 {
   "type": "CLIENT",
@@ -235,10 +235,6 @@ const generateEventName = (requestData) => {
     return requestData;
   } else if (requestData.ping) {
     requestData.event_name = 'ping';
-  } else if (requestData.c_i) {
-    requestData.event_name = 'content_interaction';
-  } else if (requestData.c_n) {
-    requestData.event_name = 'content_impression';
   } else if (requestData.e_t) {
     requestData.event_name = requestData.e_t;
   } else if (requestData.e_c) {
@@ -249,11 +245,11 @@ const generateEventName = (requestData) => {
     requestData.event_name = 'click';
   } else if (requestData.download) {
     requestData.event_name = 'file_download';
-  } else if (requestData.idgoal) {
-    requestData.event_name = 'goal_conversion';
   } else if (requestData.action_name) {
     requestData.event_name = 'page_view';
-  }  else {
+  } else if (requestData.idgoal) {
+    requestData.event_name = 'goal_conversion';
+  } else {
     requestData.event_name = DEFAULT_EVENT_NAME;
   }
   return requestData;
