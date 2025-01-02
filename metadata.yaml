@@ -2,6 +2,8 @@ homepage: "https://www.piwik.pro/"
 documentation: "https://developers.piwik.pro/en/latest/data_collection/api/http_api.html"
 versions:
   # Latest version
+  - sha: 57789dbd81a85685c3fe5ee1a6a3b862d15c9d6b
+    changeNotes: README update
   - sha: f9c22352e033ce4a5069c1904eb3353fe25b0c9e
     changeNotes: Fix event type recognition
   - sha: 24376c654b4858b40b90c8d7f3abdd89eb9da967
