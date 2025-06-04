@@ -125,7 +125,7 @@ const templateDataStorage = require('templateDataStorage');
 
 const CACHE_MAX_TIME_MS = 43200000;
 const CDN_PATH = 'https://' + data.instanceName + '.piwik.pro' + getRequestPath();
-const COMMON_EVENT_KEYS_IN_PIWIK = ['event_name', '_id', 'cip', 'lang', 'url', 'urlref', 'res', 'ua', 'uid', 'revenue', 'e_v'];
+const COMMON_EVENT_KEYS_IN_PIWIK = ['event_name', '_id', 'cip', 'lang', 'url', 'urlref', 'res', 'ua', 'uid', 'revenue'];
 const DEFAULT_EVENT_NAME = 'piwik';
 const EVENT_PREFIX = 'x-pp-';
 const JSON_FIELDS = ['cvar', '_cvar', 'search_cats', 'ec_products'];
@@ -281,7 +281,7 @@ const mapToEventSchema = (requestData) => {
     screen_resolution: requestData.res,
     user_agent: requestData.ua || getRequestHeader('User-Agent'),
     user_id: requestData.uid,
-    value: requestData.revenue || requestData.e_v
+    value: requestData.revenue
   };
   // All the rest of the keys can be assumed to be Piwik-specific
   const piwikData = Object.keys(requestData)
