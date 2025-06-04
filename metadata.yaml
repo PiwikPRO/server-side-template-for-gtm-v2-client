@@ -2,6 +2,8 @@ homepage: "https://www.piwik.pro/"
 documentation: "https://developers.piwik.pro/en/latest/data_collection/api/http_api.html"
 versions:
   # Latest version
+  - sha: 112bba5236ac8ddde6e846c6869ecb3b1e0af3d0
+    changeNotes: Fix e_v / revenue assignment.
   - sha: f34b5bdfed3a8eea96a1264d09b73359fa9ea704
     changeNotes: README update
   - sha: f9c22352e033ce4a5069c1904eb3353fe25b0c9e
