@@ -2,6 +2,8 @@ homepage: "https://www.piwik.pro/"
 documentation: "https://developers.piwik.pro/en/latest/data_collection/api/http_api.html"
 versions:
   # Latest version
+  - sha: 5a6db7fe49c9f6cdc324ac78856df8c4523a3527
+    changeNotes: Fix cache request toggle to enable/disable caching.
   - sha: 112bba5236ac8ddde6e846c6869ecb3b1e0af3d0
     changeNotes: Fix e_v / revenue assignment.
   - sha: f34b5bdfed3a8eea96a1264d09b73359fa9ea704
