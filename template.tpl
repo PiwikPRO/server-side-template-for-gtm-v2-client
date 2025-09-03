@@ -328,7 +328,7 @@ if (REQUEST_PATH === getPpmsFilePath() || REQUEST_PATH === getPpasFilePath()) {
     log('No cache hit or cache expired, fetching ' + REQUEST_PATH + ' over the network.');
     sendHttpGet(CDN_PATH, {timeout: 1500})
       .then(result => {
-        if (result.statusCode === 200) {
+        if (result.statusCode === 200 && data.cacheRequests) {
           templateDataStorage.setItemCopy(STORED_JS_NAME, result.body);
           templateDataStorage.setItemCopy(STORED_HEADERS_NAME, result.headers);
           templateDataStorage.setItemCopy(STORED_TIMEOUT_NAME, now);
